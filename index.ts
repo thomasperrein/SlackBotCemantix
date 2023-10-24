@@ -2,10 +2,9 @@ import { serve } from "https://deno.land/std@0.119.0/http/server.ts";
 import { readLines } from "https://deno.land/std@0.119.0/io/mod.ts";
 import { BufReader } from "https://deno.land/std@0.119.0/io/bufio.ts";
 import { shuffle } from "https://deno.land/x/collections@v0.5.2/common.ts";
-import { open, close } from 'https://deno.land/x/open/index.ts';
 
 const words: string[] = [];
-const wordFilePath = "./list°mot_fr.txt";
+const wordFilePath = "./list_mot_fr.txt";
 
 async function loadWords() {
   const file = await open(wordFilePath);
@@ -24,9 +23,11 @@ async function getRandomWord(): Promise<string> {
   return shuffle(words)[0];
 }
 
+let wordToFind ;
+
 async function handler(_req: Request): Promise<Response> {
   try {
-    const wordToFind = getRandomWord();
+    initializeGame()
     const guess = await extractGuess(_req);
     const similarityResult = await similarity(guess, wordToFind);
     console.log(
@@ -48,8 +49,15 @@ const extractGuess = async (req: Request) => {
   return guess;
 };
 
+async function initializeGame() {
+    await loadWords();
+    wordToFind = await getRandomWord();
+    console.log(`Word to find: ${wordToFind}`);
+  }
+
 const responseBuilder = (word: string, similarity: Number) => {
   if (similarity == 1) {
+    initializeGame();
     return `Well played ! The word was ${word}.`;
   } else if (similarity > 0.5) {
     return `${word} is very close to the word, score : ${similarity}`;
