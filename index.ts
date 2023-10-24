@@ -2,18 +2,19 @@ import { serve } from "https://deno.land/std@0.119.0/http/server.ts";
 import { readLines } from "https://deno.land/std@0.119.0/io/mod.ts";
 import { BufReader } from "https://deno.land/std@0.119.0/io/bufio.ts";
 import { shuffle } from "https://deno.land/x/collections@v0.5.2/common.ts";
+import { open, close } from 'https://deno.land/x/open/index.ts';
 
 const words: string[] = [];
 const wordFilePath = "./list°mot_fr.txt";
 
 async function loadWords() {
-  const file = await Deno.open(wordFilePath);
+  const file = await open(wordFilePath);
   const bufReader = new BufReader(file);
   let line: string | null;
   while ((line = await readLines(bufReader)) !== null) {
     words.push(line.value);
   }
-  Deno.close(file.rid);
+  close(file.rid);
 }
 
 async function getRandomWord(): Promise<string> {
